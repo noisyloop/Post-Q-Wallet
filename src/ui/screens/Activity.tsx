@@ -1,8 +1,8 @@
-import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ExternalLink } from 'lucide-react';
+import { ArrowDownLeft, ArrowLeftRight, ArrowUpRight, ExternalLink, Rocket } from 'lucide-react';
 import { useWallet } from '../state';
 import { ScreenHeader } from '../components/common';
 
-const ICON = { send: ArrowUpRight, receive: ArrowDownLeft, swap: ArrowLeftRight };
+const ICON = { send: ArrowUpRight, receive: ArrowDownLeft, swap: ArrowLeftRight, launch: Rocket };
 
 const day = (ts: number) => {
   const d = new Date(ts);

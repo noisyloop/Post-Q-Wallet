@@ -83,6 +83,8 @@ async function unlock(page, slow) {
 }
 
 async function hold(page, slow) {
+  await page.locator('[data-testid=hold-button]').scrollIntoViewIfNeeded();
+  await sleep(slow ? 400 : 100);
   const box = await page.locator('[data-testid=hold-button]').boundingBox();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
@@ -168,6 +170,39 @@ async function send(page, shot, slow) {
   await sleep(slow ? 500 : 200);
 }
 
+async function launchToken(page, shot, slow) {
+  await page.click('[data-testid=tab-launch]');
+  await sleep(slow ? 900 : 300);
+  await page.locator('[data-testid=launch-name]').pressSequentially('Post Q Doge', { delay: slow ? 70 : 0 });
+  await page.locator('[data-testid=launch-symbol]').pressSequentially('PQDOGE', { delay: slow ? 90 : 0 });
+  await sleep(slow ? 500 : 100);
+  await page.locator('[data-testid=launch-sol]').fill('');
+  await page.locator('[data-testid=launch-sol]').pressSequentially('8', { delay: slow ? 120 : 0 });
+  await sleep(slow ? 700 : 200);
+  await shot('20-launch-form');
+  await page.locator('.tax-box').scrollIntoViewIfNeeded();
+  await page.evaluate(() => document.querySelector('.screen.launch').scrollBy(0, 160));
+  await sleep(slow ? 700 : 200);
+  for (const k of slow ? ['light', 'max', 'standard'] : ['standard']) {
+    await page.click(`[data-testid=tax-${k}]`);
+    await sleep(slow ? 900 : 100);
+  }
+  await shot('21-launch-anti-snipe');
+  await page.click('[data-testid=launch-review]');
+  await page.waitForSelector('[data-testid=launch-checks]');
+  await sleep(slow ? 2200 : 400);
+  await shot('22-launch-review');
+  await page.click('[data-testid=launch-ack]');
+  await sleep(slow ? 500 : 100);
+  await hold(page, slow);
+  await page.waitForSelector('.pstep.active');
+  await sleep(slow ? 1000 : 800);
+  await shot('23-launch-progress');
+  await page.waitForSelector('[data-testid=launch-done]', { timeout: 20_000 });
+  await sleep(slow ? 2500 : 500);
+  await shot('24-launch-live');
+}
+
 async function settingsAndActivity(page, shot) {
   await page.click('[data-testid=tab-activity]');
   await sleep(400);
@@ -194,6 +229,9 @@ async function screenshots(browser) {
   await homeTour(page, shot, false);
   await crossChainSwap(page, shot, false);
   await send(page, shot, false);
+  await launchToken(page, shot, false);
+  await page.click('text=Done');
+  await sleep(300);
   await settingsAndActivity(page, shot);
   const state = await ctx.storageState();
   await ctx.close();
@@ -224,12 +262,13 @@ try {
   console.log('Screenshots');
   const state = await screenshots(browser);
   // Activity from the screenshot run would leak into the GIFs; keep only the vault.
-  state.origins.forEach((o) => { o.localStorage = o.localStorage.filter((kv) => kv.name !== 'pqw.activity'); });
+  state.origins.forEach((o) => { o.localStorage = o.localStorage.filter((kv) => kv.name !== 'pqw.activity' && kv.name !== 'pqw.launches'); });
 
   console.log('GIFs');
   await recordGif(browser, 'onboarding', undefined, (p) => onboarding(p, noShot, true));
   await recordGif(browser, 'cross-chain-swap', state, async (p) => { await unlock(p, true); await crossChainSwap(p, noShot, true); });
   await recordGif(browser, 'send', state, async (p) => { await unlock(p, true); await send(p, noShot, true); });
+  await recordGif(browser, 'launch-memecoin', state, async (p) => { await unlock(p, true); await launchToken(p, noShot, true); });
   await recordGif(browser, 'portfolio-receive', state, async (p) => { await unlock(p, true); await homeTour(p, noShot, true); });
   await browser.close();
 } finally {

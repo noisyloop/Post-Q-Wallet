@@ -1,0 +1,422 @@
+{
+ "_source": "Generated with @meteora-ag/cp-amm-sdk@1.5.1, @solana/web3.js@1.98.0, @solana/spl-token@0.4.9, @metaplex-foundation/mpl-token-metadata@3.4.0",
+ "payerSeed": "01080f161d242b323940474e555c636a71787f868d949ba2a9b0b7bec5ccd3da",
+ "mintSeed": "020910171e252c333a41484f565d646b727980878e959ca3aab1b8bfc6cdd4db",
+ "positionSeed": "030a11181f262d343b424950575e656c737a81888f969da4abb2b9c0c7ced5dc",
+ "token": [
+  {
+   "programId": "11111111111111111111111111111111",
+   "keys": [
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     1
+    ],
+    [
+     "GyfFHe77pcZtdgGnWGw4T1VxCPB6JJyGLfjzMagDdsz3",
+     1,
+     1
+    ]
+   ],
+   "data": "00000000604d160000000000520000000000000006ddf6e1d765a193d9cbe146ceeb79ac1cb485ed5f5b37913a8cf5857eff00a9"
+  },
+  {
+   "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+   "keys": [
+    [
+     "GyfFHe77pcZtdgGnWGw4T1VxCPB6JJyGLfjzMagDdsz3",
+     0,
+     1
+    ]
+   ],
+   "data": "1406e4030998cfd5ad1723c169f956aa0b9eb8619b5992bd612c2af428ebc79f8df0000000000000000000000000000000000000000000000000000000000000000000"
+  },
+  {
+   "programId": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+   "keys": [
+    [
+     "6ngRaT98KP4cQFuL7pn3AHcLAZtyUtAeMnatNBUJ26Xh",
+     0,
+     1
+    ],
+    [
+     "GyfFHe77pcZtdgGnWGw4T1VxCPB6JJyGLfjzMagDdsz3",
+     0,
+     0
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     0
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     1
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     0,
+     0
+    ],
+    [
+     "11111111111111111111111111111111",
+     0,
+     0
+    ]
+   ],
+   "data": "210b000000506f7374205120446f6765060000005051444f47451f00000068747470733a2f2f6578616d706c652e636f6d2f7071646f67652e6a736f6e00000000000000"
+  },
+  {
+   "programId": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+   "keys": [
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     1
+    ],
+    [
+     "273LmzXth5mPxYsj3KvGFjzuxWBxWxqXzhAurny6m2Q1",
+     0,
+     1
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     0,
+     0
+    ],
+    [
+     "GyfFHe77pcZtdgGnWGw4T1VxCPB6JJyGLfjzMagDdsz3",
+     0,
+     0
+    ],
+    [
+     "11111111111111111111111111111111",
+     0,
+     0
+    ],
+    [
+     "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+     0,
+     0
+    ]
+   ],
+   "data": "01"
+  },
+  {
+   "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+   "keys": [
+    [
+     "GyfFHe77pcZtdgGnWGw4T1VxCPB6JJyGLfjzMagDdsz3",
+     0,
+     1
+    ],
+    [
+     "273LmzXth5mPxYsj3KvGFjzuxWBxWxqXzhAurny6m2Q1",
+     0,
+     1
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     0
+    ]
+   ],
+   "data": "070080c6a47e8d0300"
+  },
+  {
+   "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+   "keys": [
+    [
+     "GyfFHe77pcZtdgGnWGw4T1VxCPB6JJyGLfjzMagDdsz3",
+     0,
+     1
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     0
+    ]
+   ],
+   "data": "0600000000000000000000000000000000000000000000000000000000000000000000"
+  }
+ ],
+ "pool": [
+  {
+   "programId": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+   "keys": [
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     1
+    ],
+    [
+     "273LmzXth5mPxYsj3KvGFjzuxWBxWxqXzhAurny6m2Q1",
+     0,
+     1
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     0,
+     0
+    ],
+    [
+     "GyfFHe77pcZtdgGnWGw4T1VxCPB6JJyGLfjzMagDdsz3",
+     0,
+     0
+    ],
+    [
+     "11111111111111111111111111111111",
+     0,
+     0
+    ],
+    [
+     "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+     0,
+     0
+    ]
+   ],
+   "data": "01"
+  },
+  {
+   "programId": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+   "keys": [
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     1
+    ],
+    [
+     "CRCVGRYuqKGKcEmuztnSp7SGp5PKwekqA6GKiytaGqKc",
+     0,
+     1
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     0,
+     0
+    ],
+    [
+     "So11111111111111111111111111111111111111112",
+     0,
+     0
+    ],
+    [
+     "11111111111111111111111111111111",
+     0,
+     0
+    ],
+    [
+     "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+     0,
+     0
+    ]
+   ],
+   "data": "01"
+  },
+  {
+   "programId": "11111111111111111111111111111111",
+   "keys": [
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     1
+    ],
+    [
+     "CRCVGRYuqKGKcEmuztnSp7SGp5PKwekqA6GKiytaGqKc",
+     0,
+     1
+    ]
+   ],
+   "data": "0200000000f2052a01000000"
+  },
+  {
+   "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+   "keys": [
+    [
+     "CRCVGRYuqKGKcEmuztnSp7SGp5PKwekqA6GKiytaGqKc",
+     0,
+     1
+    ]
+   ],
+   "data": "11"
+  },
+  {
+   "programId": "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
+   "keys": [
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     0,
+     0
+    ],
+    [
+     "8u8LCMQvMKrFxHbn326Ltcqv72HDPEC5FPMgPC3mXvxV",
+     1,
+     1
+    ],
+    [
+     "6MtUCQ5oQZpSiVov11xi9nW1yf4wrgsvrUug7ADKBuQs",
+     0,
+     1
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     1
+    ],
+    [
+     "HLnpSz9h2S4hiLQ43rnSD9XkcUThA7B8hQMKmDaiTLcC",
+     0,
+     0
+    ],
+    [
+     "8DepMs9A7tNNAfpsthBNbmsJfYPXEjaKoPFDRP147CGQ",
+     0,
+     1
+    ],
+    [
+     "7bzEs9V5skVL6jWbbTjMM9wRuaeUaXQY5CSLjn46pfpf",
+     0,
+     1
+    ],
+    [
+     "GyfFHe77pcZtdgGnWGw4T1VxCPB6JJyGLfjzMagDdsz3",
+     0,
+     0
+    ],
+    [
+     "So11111111111111111111111111111111111111112",
+     0,
+     0
+    ],
+    [
+     "HG5L4WUvN93TAbh7WFGsMPGLdiRNYFpdn5g4tg6zsP2L",
+     0,
+     1
+    ],
+    [
+     "6bqgbm3qtoRFvzZKHiPLqAmEUDuiw4bDdpFr4qbVDgvf",
+     0,
+     1
+    ],
+    [
+     "273LmzXth5mPxYsj3KvGFjzuxWBxWxqXzhAurny6m2Q1",
+     0,
+     1
+    ],
+    [
+     "CRCVGRYuqKGKcEmuztnSp7SGp5PKwekqA6GKiytaGqKc",
+     0,
+     1
+    ],
+    [
+     "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+     0,
+     0
+    ],
+    [
+     "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+     0,
+     0
+    ],
+    [
+     "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+     0,
+     0
+    ],
+    [
+     "11111111111111111111111111111111",
+     0,
+     0
+    ],
+    [
+     "3rmHSu74h1ZcmAisVcWerTCiRDQbUrBKmcwptYGjHfet",
+     0,
+     0
+    ],
+    [
+     "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
+     0,
+     0
+    ],
+    [
+     "E2duA7Jfr3miMjWLjX5Jq3qcptuiZPByVcThExaQVNhR",
+     0,
+     0
+    ],
+    [
+     "8dnhmayAP3LA957YgSdP3Nw48ZJM6C4248qfFeyfnxTP",
+     0,
+     0
+    ]
+   ],
+   "data": "14a1f118bdddb4028017b42c000000001e000a000000000000003c050000000000000100000000503b01000100000000000000000000009b57694ea91a5c84b1c4feff0000000000a87e78bc66876fe2dd5f0ba0080200005aa6c255ff8a9200000000000000000001010100b9556900000000"
+  },
+  {
+   "programId": "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
+   "keys": [
+    [
+     "8DepMs9A7tNNAfpsthBNbmsJfYPXEjaKoPFDRP147CGQ",
+     0,
+     1
+    ],
+    [
+     "7bzEs9V5skVL6jWbbTjMM9wRuaeUaXQY5CSLjn46pfpf",
+     0,
+     1
+    ],
+    [
+     "6MtUCQ5oQZpSiVov11xi9nW1yf4wrgsvrUug7ADKBuQs",
+     0,
+     0
+    ],
+    [
+     "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+     1,
+     0
+    ],
+    [
+     "3rmHSu74h1ZcmAisVcWerTCiRDQbUrBKmcwptYGjHfet",
+     0,
+     0
+    ],
+    [
+     "cpamdpZCGKUy5JxQXB4dcpGPiikHawvSWAd6mEn1sGG",
+     0,
+     0
+    ]
+   ],
+   "data": "a5b07d06e7abbad5a87e78bc66876fe2dd5f0ba008020000"
+  }
+ ],
+ "sdkSqrtPrice": "41248175859869274",
+ "sdkLiquidity": "41248175859890749242316152143528",
+ "baseFee": "8017b42c000000001e000a000000000000003c0500000000000001",
+ "poolAddress": "8DepMs9A7tNNAfpsthBNbmsJfYPXEjaKoPFDRP147CGQ",
+ "computePrice": {
+  "programId": "ComputeBudget111111111111111111111111111111",
+  "keys": [],
+  "data": "0350c3000000000000"
+ },
+ "closeWsol": {
+  "programId": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  "keys": [
+   [
+    "CRCVGRYuqKGKcEmuztnSp7SGp5PKwekqA6GKiytaGqKc",
+    0,
+    1
+   ],
+   [
+    "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+    0,
+    1
+   ],
+   [
+    "GM4eCsQuaLNXApYz6YYUQVMxajTaJ7dB4TbroFGBaou9",
+    1,
+    0
+   ]
+  ],
+  "data": "09"
+ }
+}

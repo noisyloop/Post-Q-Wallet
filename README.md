@@ -1,10 +1,10 @@
 # Post-Q Wallet
 
-A self-custodial, multi-chain crypto wallet with built-in **cross-chain swaps**. The layout follows Phantom's newer design, with gradient touches borrowed from Rainbow. It runs entirely in the browser: your keys are generated, encrypted and used on your device and never leave it.
+A self-custodial, multi-chain crypto wallet with built-in **cross-chain swaps** and a **sniper-resistant memecoin launcher** on Solana. The layout follows Phantom's newer design, with gradient touches borrowed from Rainbow. It runs entirely in the browser: your keys are generated, encrypted and used on your device and never leave it.
 
-| Cross-chain swap (Arbitrum ETH → Solana SOL) | Onboarding | Send | Portfolio & receive |
-|:-:|:-:|:-:|:-:|
-| ![Cross-chain swap](docs/media/cross-chain-swap.gif) | ![Onboarding](docs/media/onboarding.gif) | ![Send](docs/media/send.gif) | ![Portfolio](docs/media/portfolio-receive.gif) |
+| Cross-chain swap (Arbitrum ETH → Solana SOL) | Launch a memecoin | Onboarding | Send | Portfolio & receive |
+|:-:|:-:|:-:|:-:|:-:|
+| ![Cross-chain swap](docs/media/cross-chain-swap.gif) | ![Launch](docs/media/launch-memecoin.gif) | ![Onboarding](docs/media/onboarding.gif) | ![Send](docs/media/send.gif) | ![Portfolio](docs/media/portfolio-receive.gif) |
 
 > The screenshots and GIFs were recorded in **demo mode**: balances and quotes are simulated, but key generation, vault encryption and every swap safety check run for real.
 
@@ -44,6 +44,38 @@ The aggregator API counts as **untrusted input**. A quote can only be signed whe
 - Solana: the wallet only signs if it is the fee payer and the only required signer.
 - Bitcoin PSBTs: every input must belong to this wallet, outgoing value can't exceed the quote, and the fee is bounded.
 
+## Launch a memecoin (Solana)
+
+The **Launch** tab creates an SPL token and its liquidity pool so that neither snipers nor insiders get an edge. It uses two transactions, both signed on your device:
+
+1. **Create the token.** This creates the mint (6 decimals, **no freeze authority**) and **immutable** Metaplex metadata. It then mints the full fixed supply and **revokes the mint authority**, all in the same transaction.
+2. **Create the pool.** This creates a [Meteora DAMM v2](https://docs.meteora.ag) constant-product pool against SOL with an **anti-sniper fee scheduler**. It then **permanently locks 100% of the LP position**, also in the same transaction.
+
+<p>
+<img src="docs/media/20-launch-form.png" width="160"> <img src="docs/media/21-launch-anti-snipe.png" width="160"> <img src="docs/media/22-launch-review.png" width="160"> <img src="docs/media/23-launch-progress.png" width="160"> <img src="docs/media/24-launch-live.png" width="160">
+</p>
+
+### How it stops snipers and insiders
+
+| Threat | Protection |
+|---|---|
+| Bots buying in the first block | **Sniper tax.** The swap fee starts high and decays exponentially: *Light* 50%, *Standard* 75%, *Maximum* 90% at open, falling to your long-term fee (0.25%, 1% or 2%) over 2, 5 or 10 minutes. A bot that buys in the first second pays most of its SOL as fees, and those fees go to **your LP position**. |
+| Racing the creator's own pool | **Scheduled open.** The pool and lock are created now, but swaps only start at a time you choose (now, or in 5, 15 or 60 minutes). Everyone, including you, gets the same start, and buyers can verify the setup on-chain first. |
+| Hidden insider allocation | **100% of supply goes into the pool by default.** An optional creator allocation is capped at 10% and shown to buyers as a warning, since it is visible on-chain. |
+| Rug pull | **Liquidity is permanently locked** in the transaction that creates the pool. You keep the position NFT, which can claim trading fees but can never withdraw liquidity. |
+| Infinite mint or frozen wallets | The mint authority is revoked in the transaction that mints the supply. No freeze authority is ever set. Metadata is immutable. |
+
+### Safety of the launch flow itself
+
+- Instructions are hand-encoded (no Solana or Meteora SDK in the bundle). They are **checked byte-for-byte** against `@meteora-ag/cp-amm-sdk`, `@solana/web3.js`, `@solana/spl-token` and `@metaplex-foundation/mpl-token-metadata` output (`tests/launch.test.ts`, fixtures from `scripts/gen-launch-fixtures.cjs`).
+- Each transaction is **simulated before sending**. Each is size-checked against Solana's 1232-byte limit, including with maximum-length metadata. The wallet waits for confirmation before the next step.
+- The mint and position-NFT keypairs are generated on the device and wiped after their single signature.
+- Inputs are validated: name ≤ 32 bytes, ticker ≤ 10 characters, metadata URI must be https://, ipfs:// or ar://, supply stays within u64, liquidity is at least 0.1 SOL with enough balance left for about 0.08 SOL of rent and fees, and the opening time is 1 minute to 7 days away.
+- The launch can be resumed. If the token is created but the pool transaction fails, **Your launches** offers *Finish launch*. It checks that your token balance is still intact before creating the pool.
+- Before the hold-to-launch button, a risk acknowledgement is required: the SOL is locked forever, memecoins are speculative, and launching a token may carry legal obligations.
+
+**Not yet in the wallet:** claiming LP fees, uploading images or metadata (a helper builds the `metadata.json` for you to host on IPFS or Arweave), and showing launched tokens in the portfolio.
+
 ## Screens
 
 <p>
@@ -73,6 +105,7 @@ The aggregator API counts as **untrusted input**. A quote can only be signed whe
 - The vault sits in `localStorage`. Malware or a malicious browser extension on the same machine with access to this origin could capture your password as you type it. A browser-extension or native build would add OS-level isolation.
 - Live mode depends on public RPC endpoints (PublicNode, mempool.space) and the LI.FI API. You can point the wallet at your own nodes with the `VITE_RPC_*` and `VITE_BTC_API` environment variables, and the CSP picks them up automatically.
 - Bitcoin-origin swaps depend on LI.FI's UTXO transaction format and should be treated as **experimental**.
+- **The token launcher has been verified against the official SDKs but not yet run on mainnet** (this build environment has no network access). Try a small launch first. Note that pools at the 90% *Maximum* sniper-tax preset need Meteora pool version 1 fee limits (up to 99%).
 - The token list is a curated allow-list, so unknown or airdropped spam tokens are never displayed.
 
 ## Development
@@ -80,7 +113,7 @@ The aggregator API counts as **untrusted input**. A quote can only be signed whe
 ```bash
 npm ci
 npm run dev        # http://localhost:5173 (CSP is only injected in production builds)
-npm test           # 36 unit tests: derivation vectors, vault, Solana encoding, swap validation, BTC tx building
+npm test           # 48 unit tests: derivation vectors, vault, Solana encoding, swap validation, BTC tx building, token launch
 npm run build      # type-check + production build into dist/
 npm run media      # rebuild screenshots + GIFs in docs/media (needs ffmpeg + Chromium)
 ```
@@ -93,6 +126,7 @@ To try the wallet without funds, switch on **Demo mode** on the welcome screen, 
 - SLIP-10 ed25519 official test vectors.
 - Solana SOL and SPL transfer messages are **byte-identical** to `@solana/web3.js` output, and associated token addresses match `@solana/spl-token`.
 - Vault round-trip, wrong password, ciphertext tampering, KDF downgrade and lockout back-off.
+- Token launch: mint, metadata and authority revocation, plus the Meteora pool, fee scheduler and permanent-lock instructions, all byte-identical to the official SDKs. Pool PDAs and liquidity math match the SDK exactly, and both transactions fit in one packet.
 - Swap validation: unknown router, foreign recipient, chain-id or amount tampering, unknown approval spender, slippage floor, quote expiry and price impact.
 
 ### Layout
@@ -105,6 +139,7 @@ src/core/            framework-free wallet logic
   security.ts        address/password validation, poisoning detection
   chains/            registry, EVM (viem), Solana (hand-rolled), Bitcoin (btc-signer)
   swap/              LI.FI client, quote types, safety validation
+  launch/            SPL token + Metaplex metadata, Meteora DAMM v2 pool, launch planner/executor
   backend/           live (mainnet) and demo (simulated) backends
 src/ui/              React screens and components
 scripts/capture-media.mjs   Playwright script that produced docs/media

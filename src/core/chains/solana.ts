@@ -38,13 +38,13 @@ export const decodeCompactU16 = (bytes: Uint8Array, offset: number): [value: num
   throw new Error('Invalid compact-u16');
 };
 
-const u64le = (n: bigint): Uint8Array => {
+export const u64le = (n: bigint): Uint8Array => {
   const b = new Uint8Array(8);
   new DataView(b.buffer).setBigUint64(0, n, true);
   return b;
 };
 
-const concat = (...parts: (Uint8Array | number[])[]): Uint8Array => {
+export const concat = (...parts: (Uint8Array | number[])[]): Uint8Array => {
   const len = parts.reduce((s, p) => s + p.length, 0);
   const out = new Uint8Array(len);
   let o = 0;
@@ -52,7 +52,7 @@ const concat = (...parts: (Uint8Array | number[])[]): Uint8Array => {
   return out;
 };
 
-const isOnCurve = (pk: Uint8Array): boolean => {
+export const isOnCurve = (pk: Uint8Array): boolean => {
   try { ed25519.ExtendedPoint.fromHex(pk); return true; } catch { return false; }
 };
 
@@ -119,23 +119,25 @@ export const systemTransferIx = (from: string, to: string, lamports: bigint): In
   data: concat([2, 0, 0, 0], u64le(lamports)),
 });
 
+/** CreateIdempotent: no-op if the token account already exists. */
+export const createAtaIdempotentIx = (payer: string, owner: string, mint: string): Instruction => ({
+  programId: ATA_PROGRAM,
+  keys: [
+    { pubkey: payer, isSigner: true, isWritable: true },
+    { pubkey: associatedTokenAddress(owner, mint), isSigner: false, isWritable: true },
+    { pubkey: owner, isSigner: false, isWritable: false },
+    { pubkey: mint, isSigner: false, isWritable: false },
+    { pubkey: SYSTEM_PROGRAM, isSigner: false, isWritable: false },
+    { pubkey: TOKEN_PROGRAM, isSigner: false, isWritable: false },
+  ],
+  data: new Uint8Array([1]),
+});
+
 export const splTransferIxs = (owner: string, to: string, mint: string, amount: bigint, decimals: number): Instruction[] => {
   const src = associatedTokenAddress(owner, mint);
   const dst = associatedTokenAddress(to, mint);
   return [
-    {
-      // CreateIdempotent: no-op if the recipient's token account already exists.
-      programId: ATA_PROGRAM,
-      keys: [
-        { pubkey: owner, isSigner: true, isWritable: true },
-        { pubkey: dst, isSigner: false, isWritable: true },
-        { pubkey: to, isSigner: false, isWritable: false },
-        { pubkey: mint, isSigner: false, isWritable: false },
-        { pubkey: SYSTEM_PROGRAM, isSigner: false, isWritable: false },
-        { pubkey: TOKEN_PROGRAM, isSigner: false, isWritable: false },
-      ],
-      data: new Uint8Array([1]),
-    },
+    createAtaIdempotentIx(owner, to, mint),
     {
       programId: TOKEN_PROGRAM,
       keys: [
@@ -151,6 +153,31 @@ export const splTransferIxs = (owner: string, to: string, mint: string, amount: 
 
 export const signLegacyMessage = (priv: Uint8Array, message: Uint8Array): Uint8Array =>
   concat(encodeCompactU16(1), ed25519.sign(message, priv), message);
+
+/** Public key (base58) for an ed25519 private key. */
+export const solPubkey = (priv: Uint8Array): string => base58.encode(ed25519.getPublicKey(priv));
+
+/**
+ * Sign a legacy message with several keys (fee payer + freshly generated
+ * account keypairs). Signatures are placed in the order of the message's
+ * signer accounts; every required signer must be provided.
+ */
+export const signLegacyMessageMulti = (message: Uint8Array, privs: Uint8Array[]): Uint8Array => {
+  const required = message[0];
+  const [, keyLen] = decodeCompactU16(message, 3);
+  const byPub = new Map(privs.map((p) => [solPubkey(p), p]));
+  const sigs: Uint8Array[] = [];
+  for (let i = 0; i < required; i++) {
+    const off = 3 + keyLen + i * 32;
+    const pk = base58.encode(message.slice(off, off + 32));
+    const priv = byPub.get(pk);
+    if (!priv) throw new Error(`Missing signer ${pk}`);
+    sigs.push(ed25519.sign(message, priv));
+  }
+  return concat(encodeCompactU16(required), ...sigs, message);
+};
+
+export const TX_SIZE_LIMIT = 1232;
 
 /**
  * Sign a serialized (legacy or v0) transaction produced by a swap API.
@@ -219,4 +246,41 @@ export const buildSolanaTransfer = async (priv: Uint8Array, token: Token, to: st
   const ixs = token.address ? splTransferIxs(owner, to, token.address, amount, token.decimals) : [systemTransferIx(owner, to, amount)];
   const msg = compileLegacyMessage(owner, await solanaLatestBlockhash(), ixs);
   return signLegacyMessage(priv, msg);
+};
+
+export const solanaRentExempt = (bytes: number): Promise<number> => solRpc<number>('getMinimumBalanceForRentExemption', [bytes]);
+
+/** Dry-run a signed transaction; throws with program logs if it would fail. */
+export const solanaSimulate = async (tx: Uint8Array): Promise<void> => {
+  const r = await solRpc<{ value: { err: unknown; logs?: string[] } }>('simulateTransaction', [
+    base64.encode(tx), { encoding: 'base64', sigVerify: true, commitment: 'confirmed' },
+  ]);
+  if (r.value.err) {
+    const log = (r.value.logs ?? []).filter((l) => /error|failed/i.test(l)).slice(-2).join(' | ');
+    throw new Error(`Simulation failed: ${JSON.stringify(r.value.err)}${log ? ` — ${log}` : ''}`);
+  }
+};
+
+const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+/** Poll until the signature is confirmed; throws on failure or timeout. */
+export const solanaConfirm = async (sig: string, timeoutMs = 75_000): Promise<void> => {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const r = await solRpc<{ value: ({ err: unknown; confirmationStatus?: string } | null)[] }>('getSignatureStatuses', [[sig]]);
+    const st = r.value[0];
+    if (st?.err) throw new Error(`Transaction failed: ${JSON.stringify(st.err)}`);
+    if (st && (st.confirmationStatus === 'confirmed' || st.confirmationStatus === 'finalized')) return;
+    await wait(1500);
+  }
+  throw new Error('Transaction not confirmed in time — check the explorer before retrying');
+};
+
+export const solanaTokenBalance = async (owner: string, mint: string): Promise<bigint> => {
+  try {
+    const r = await solRpc<{ value: { amount: string } }>('getTokenAccountBalance', [associatedTokenAddress(owner, mint), { commitment: 'confirmed' }]);
+    return BigInt(r.value.amount);
+  } catch {
+    return 0n;
+  }
 };
