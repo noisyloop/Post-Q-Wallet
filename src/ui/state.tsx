@@ -7,16 +7,16 @@ import {
 import { closeSession, openSession, touchSession } from '../core/session';
 import { createLiveBackend } from '../core/backend/live';
 import { createDemoBackend } from '../core/backend/demo';
-import type { Backend, Holding, Prices } from '../core/backend/types';
+import type { Backend, Holding, LaunchRecord, Prices } from '../core/backend/types';
 import { tokenKey, type Token } from '../core/chains/registry';
 import { toNumber } from '../core/format';
 
 export type Phase = 'welcome' | 'locked' | 'ready';
-export type Tab = 'home' | 'swap' | 'activity' | 'settings';
+export type Tab = 'home' | 'swap' | 'launch' | 'activity' | 'settings';
 
 export interface ActivityItem {
   id: string;
-  kind: 'send' | 'swap' | 'receive';
+  kind: 'send' | 'swap' | 'receive' | 'launch';
   ts: number;
   title: string;
   subtitle: string;
@@ -40,6 +40,8 @@ interface Ctx {
   refresh(): Promise<void>;
   activity: ActivityItem[];
   addActivity(a: ActivityItem): void;
+  launches: LaunchRecord[];
+  saveLaunch(r: LaunchRecord): void;
   createWallet(mnemonic: string, password: string): Promise<void>;
   unlock(password: string): Promise<void>;
   verifyPassword(password: string): Promise<string>;
@@ -55,12 +57,22 @@ const WalletCtx = createContext<Ctx | null>(null);
 
 const MODE_KEY = 'pqw.mode';
 const ACTIVITY_KEY = 'pqw.activity';
+const LAUNCHES_KEY = 'pqw.launches';
 
 const initialDemo = (): boolean => {
   // ?demo only applies before a wallet exists, so a crafted link can't make an
   // existing live wallet display simulated balances.
   if (!loadVault(localStorage) && new URLSearchParams(location.search).has('demo')) return true;
   return localStorage.getItem(MODE_KEY) === 'demo';
+};
+
+const loadLaunches = (): LaunchRecord[] => {
+  try {
+    const a = JSON.parse(localStorage.getItem(LAUNCHES_KEY) ?? '[]');
+    return Array.isArray(a) ? a.slice(0, 50) : [];
+  } catch {
+    return [];
+  }
 };
 
 const loadActivity = (): ActivityItem[] => {
@@ -80,6 +92,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
   const [prices, setPrices] = useState<Prices>({});
   const [loading, setLoading] = useState(false);
   const [activity, setActivity] = useState<ActivityItem[]>(loadActivity);
+  const [launches, setLaunches] = useState<LaunchRecord[]>(loadLaunches);
   const [tab, setTab] = useState<Tab>('home');
   const [toast, setToast] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -159,7 +172,9 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     closeSession(false);
     clearVault(localStorage);
     localStorage.removeItem(ACTIVITY_KEY);
+    localStorage.removeItem(LAUNCHES_KEY);
     setActivity([]);
+    setLaunches([]);
     setAccounts(null);
     setPhase('welcome');
   }, []);
@@ -168,6 +183,14 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     setActivity((prev) => {
       const next = [a, ...prev.filter((x) => x.id !== a.id)].slice(0, 200);
       localStorage.setItem(ACTIVITY_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const saveLaunch = useCallback((r: LaunchRecord) => {
+    setLaunches((prev) => {
+      const next = [r, ...prev.filter((x) => x.id !== r.id)].slice(0, 50);
+      localStorage.setItem(LAUNCHES_KEY, JSON.stringify(next));
       return next;
     });
   }, []);
@@ -187,7 +210,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     .sort((a, b) => b.usd - a.usd), [holdings, prices]);
 
   const value: Ctx = {
-    phase, demo, setDemo, accounts, backend, rows, prices, loading, refresh, activity, addActivity,
+    phase, demo, setDemo, accounts, backend, rows, prices, loading, refresh, activity, addActivity, launches, saveLaunch,
     createWallet, unlock, verifyPassword: decryptWithThrottle, lock, reset, tab, setTab, toast, showToast,
   };
   return <WalletCtx.Provider value={value}>{children}</WalletCtx.Provider>;

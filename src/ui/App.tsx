@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeftRight, History, Home as HomeIcon, Settings as SettingsIcon } from 'lucide-react';
+import { ArrowLeftRight, History, Home as HomeIcon, Rocket, Settings as SettingsIcon } from 'lucide-react';
 import { useWallet, type Row, type Tab } from './state';
 import { Onboarding, Unlock } from './screens/Onboarding';
 import { Home } from './screens/Home';
@@ -8,12 +8,14 @@ import { Send } from './screens/Send';
 import { Receive } from './screens/Receive';
 import { Activity } from './screens/Activity';
 import { Settings } from './screens/Settings';
+import { Launch } from './screens/Launch';
 
 type Overlay = { kind: 'send'; row?: Row } | { kind: 'receive' } | { kind: 'bridge' } | null;
 
 const TABS: { id: Tab; label: string; Icon: typeof HomeIcon }[] = [
   { id: 'home', label: 'Home', Icon: HomeIcon },
   { id: 'swap', label: 'Swap', Icon: ArrowLeftRight },
+  { id: 'launch', label: 'Launch', Icon: Rocket },
   { id: 'activity', label: 'Activity', Icon: History },
   { id: 'settings', label: 'Settings', Icon: SettingsIcon },
 ];
@@ -38,6 +40,7 @@ export const App = () => {
             />
           )}
           {tab === 'swap' && <Swap />}
+          {tab === 'launch' && <Launch />}
           {tab === 'activity' && <Activity />}
           {tab === 'settings' && <Settings />}
         </main>

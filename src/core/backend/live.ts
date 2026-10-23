@@ -11,6 +11,7 @@ import { fetchLifiQuote, fetchLifiStatus } from '../swap/lifi';
 import { hasBlocker, validateQuote } from '../swap/validate';
 import type { SwapProgress, SwapQuote } from '../swap/types';
 import type { Backend, Holding, Prices, Signer } from './types';
+import { executeLaunch } from '../launch/execute';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -141,4 +142,6 @@ export const createLiveBackend = (): Backend => ({
     const built = await signer.withKey('bitcoin', (k) => buildBtcTx(k, utxos, [{ address: to, amount }], rate));
     return btcBroadcast(built.hex);
   },
+
+  launchToken: executeLaunch,
 });

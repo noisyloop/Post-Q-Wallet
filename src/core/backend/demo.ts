@@ -11,6 +11,8 @@ import { getChain, lifiTokenAddress, TOKENS, tokenKey, type Token } from '../cha
 import { LIFI_DIAMOND } from '../swap/validate';
 import type { QuoteRequest, SwapProgress, SwapQuote, SwapTx } from '../swap/types';
 import type { Backend, Holding, Prices } from './types';
+import { poolAddressFor } from '../launch/plan';
+import { configToJson } from '../launch/record';
 
 const PRICES: Prices = {
   ethereum: { usd: 3842.17, change24h: 2.41 },
@@ -144,6 +146,29 @@ export const createDemoBackend = (): Backend => {
       const k = tokenKey(token);
       holdings.set(k, Math.max(0, (holdings.get(k) ?? 0) - asNumber(token, amount)));
       return fakeHash(k, getChain(token.chainId).family);
+    },
+
+    async launchToken(plan, _signer, onProgress, onRecord, resume) {
+      if (plan.errors.length) throw new Error(plan.errors[0]);
+      let record = resume;
+      if (!record || record.status !== 'token-created') {
+        onProgress({ phase: 'token', message: 'Creating token, minting supply, revoking mint authority' });
+        await sleep(1600);
+        const mint = base58.encode(sha256(new TextEncoder().encode(`mint${Date.now()}`)));
+        record = {
+          id: mint, name: plan.config.name.trim(), symbol: plan.config.symbol.trim(), mint, status: 'token-created',
+          createdAt: Date.now(), opensAt: plan.config.openAt, tokenTx: fakeHash(mint, 'solana'), config: configToJson(plan.config),
+        };
+        onRecord(record);
+      }
+      onProgress({ phase: 'pool', message: 'Creating pool with sniper tax and locking liquidity' });
+      await sleep(2000);
+      const sol = 'solana:native';
+      holdings.set(sol, Math.max(0, (holdings.get(sol) ?? 0) - Number(plan.poolB) / 1e9 - 0.05));
+      record = { ...record, status: 'live', pool: poolAddressFor(record.mint), poolTx: fakeHash(record.mint + 'pool', 'solana') };
+      onRecord(record);
+      onProgress({ phase: 'done', message: 'Launched' });
+      return record;
     },
   };
 };
