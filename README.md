@@ -8,6 +8,11 @@ A self-custodial, multi-chain crypto wallet with built-in **cross-chain swaps** 
 
 > The screenshots and GIFs were recorded in **demo mode**: balances and quotes are simulated, but key generation, vault encryption and every swap safety check run for real.
 
+## Documentation
+
+How it all works, in depth: **[docs/](docs/README.md)**
+[Architecture](docs/architecture.md) · [Keys & vault](docs/keys-and-vault.md) · [Chains & signing](docs/chains-and-signing.md) · [Cross-chain swaps](docs/cross-chain-swaps.md) · [Token launcher](docs/token-launcher.md) · [Security model](docs/security.md) · [Development](docs/development.md)
+
 ## Supported chains
 
 | Family | Chains | Derivation path | Assets |
